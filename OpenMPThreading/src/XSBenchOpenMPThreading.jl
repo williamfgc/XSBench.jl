@@ -1,8 +1,31 @@
+module XSBenchOpenMPThreading
 
+# struct
+export Inputs
+# functions
+export main, read_CLI
 
+import MPI
 
+HISTORY_BASED = 1
 
-function main(args)
+mutable struct Inputs
+    nthreads::Int32
+    n_isotopes::Int64
+    n_gridpoints::Int64
+    lookups::Int32
+    HM::String
+    grid_type::Int32
+    hash_bins::Int32
+    particles::Int32
+    simulation_method::Int32
+    binary_mode::Int32
+    kernel_id::Int32
+end
+
+include("io.jl")
+
+function mainImpl(args)
 
     # println(args)
 
@@ -30,4 +53,6 @@ function main(args)
     MPI.Finalize()
 end
 
-main(ARGS)
+end
+
+

@@ -1,3 +1,4 @@
+import ArgParse
 
 function logo(version::Int32)
 
@@ -40,51 +41,51 @@ end
 
 
 
-function read_CLI(args::String[])::Inputs
+function read_CLI(args::Array{String,1})
 
-    input::Inputs
+    # input = Inputs()
 
-    ## defaults to the history based simulation method
-    input.simulation_method = HISTORY_BASED
+    # ## defaults to the history based simulation method
+    # input.simulation_method = HISTORY_BASED
 
-    ## defaults to max threads on the system	
-    input.nthreads = Threads.nthreads()
+    # ## defaults to max threads on the system	
+    # input.nthreads = Threads.nthreads()
 
-    ## defaults to 355 (corresponding to H-M Large benchmark)
-    input.n_isotopes = 355
+    # ## defaults to 355 (corresponding to H-M Large benchmark)
+    # input.n_isotopes = 355
 
-    ## defaults to 11303 (corresponding to H-M Large benchmark)
-    input.n_gridpoints = 11303
+    # ## defaults to 11303 (corresponding to H-M Large benchmark)
+    # input.n_gridpoints = 11303
 
-    ## defaults to 500,000
-    input.particles = 500000
+    # ## defaults to 500,000
+    # input.particles = 500000
 
-    ## defaults to 34
-    input.lookups = 34
+    # ## defaults to 34
+    # input.lookups = 34
 
-    ## default to unionized grid
-    input.grid_type = UNIONIZED
+    # ## default to unionized grid
+    # input.grid_type = UNIONIZED
 
-    ## default to unionized grid
-    input.hash_bins = 10000
+    # ## default to unionized grid
+    # input.hash_bins = 10000
 
-    ## default to no binary read/write
-    input.binary_mode = NONE
+    # ## default to no binary read/write
+    # input.binary_mode = NONE
 
-    ## defaults to baseline kernel
-    input.kernel_id = 0
+    # ## defaults to baseline kernel
+    # input.kernel_id = 0
 
-    ## defaults to H-M Large benchmark
-    input.HM = "large"
+    # ## defaults to H-M Large benchmark
+    # input.HM = "large"
 
     ## Check if user sets these
     user_g = 0
     default_lookups = 1
     default_particles = 1
 
-    parse_settings = ArgParseSettings("XSBench.jl argument settings.")
+    parse_settings = ArgParse.ArgParseSettings("XSBench.jl argument settings.")
 
-    @add_arg_table! parse_settings begin
+    ArgParse.@add_arg_table! parse_settings begin
         "-g"
         help = "n_gridpoints"
         arg_type = Int64
@@ -92,25 +93,29 @@ function read_CLI(args::String[])::Inputs
         "-m"
         help = "Simulation Method"
         arg_type = String
-
-        "-l"
-        help = "lookups"
-        "-h"
-        help = "hash bins"
-        "-p"
-        help = "particles"
-        "-s"
-        help = "HM"
-        "-G"
-        help = "grid type"
-        "-b"
-        help = "binary mode"
-        "-k"
-        help = "kernel optimization selection"
+        # "-l"
+        # help = "lookups"
+        # "-h"
+        # help = "hash bins"
+        # "-p"
+        # help = "particles"
+        # "-s"
+        # help = "HM"
+        # "-G"
+        # help = "grid type"
+        # "-b"
+        # help = "binary mode"
+        # "-k"
+        # help = "kernel optimization selection"
     end
 
-    for (key, val) in parsed_args
-        println("  $key  =>  $(repr(val))")
+    parsed_args = ArgParse.parse_args(args, parse_settings)
+
+    # println("Parse settings ", parsed_args)
+
+    println("Print map:")
+    for (key, value) in parsed_args
+        println(key, " => ", value)
     end
 
 end
