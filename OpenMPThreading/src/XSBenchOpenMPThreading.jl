@@ -50,6 +50,37 @@ function mainImpl(args)
     # if mype == 0
     # print_inputs( in, nprocs, version )
 
+    # =====================================================================
+    # Cross Section (XS) Parallel Lookup Simulation
+    # This is the section that should be profiled, as it reflects a 
+    # realistic continuous energy Monte Carlo macroscopic cross section
+    # lookup kernel.
+    # =====================================================================
+
+    ## Start Simulation Timer
+	# omp_start = get_time();
+
+	## Run simulation
+	if in.simulation_method == EVENT_BASED 
+		if( in.kernel_id == 0 )
+			verification = run_event_based_simulation(in, SD, mype);
+		else if( in.kernel_id == 1 )
+			verification = run_event_based_simulation_optimization_1(in, SD, mype);
+		else
+		{
+			printf("Error: No kernel ID %d found!\n", in.kernel_id);
+			exit(1);
+		}
+	else
+		verification = run_history_based_simulation(in, SD, mype);
+
+	if( mype == 0)	
+	{	
+		printf("\n" );
+		printf("Simulation complete.\n" );
+	}
+
+
     MPI.Finalize()
 end
 

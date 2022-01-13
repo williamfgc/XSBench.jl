@@ -90,9 +90,12 @@ function read_CLI(args::Array{String,1})
         help = "n_gridpoints"
         arg_type = Int64
         default = 11303
+        required = false
         "-m"
         help = "Simulation Method"
         arg_type = String
+        default = "history"
+        required = false
         # "-l"
         # help = "lookups"
         # "-h"
