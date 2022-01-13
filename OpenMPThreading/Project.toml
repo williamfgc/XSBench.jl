@@ -1,0 +1,17 @@
+name = "XSBenchOpenMPThreading"
+uuid = "66724f24-b5f4-4e60-b06d-fc88f72767a6"
+version = "0.0.1"
+
+[deps]
+MPI = "da04e1cc-30fd-572f-bb4f-1f8673147195"
+ArgParse = "c7e460c6-2fb9-53a9-8c5b-16f535851c63"
+
+[compat]
+julia = "1"
+
+[extras]
+JuliaFormatter = "98e50ef6-434e-11e9-1051-2b60c6c9e899"
+Test = "eaa6fafa-8011-46e2-b288-c2f1e2a8ee56"
+
+[targets]
+test = ["Test"]
