@@ -3,7 +3,7 @@
 
 function test_args_parsing()::Bool
     args::Array{String,1} = ["-g", "32000", "-m", "this_method"]
-    XSBenchOpenMPThreading.read_CLI(args)
+    XSBenchThreads.read_CLI(args)
 
     return true
 end
