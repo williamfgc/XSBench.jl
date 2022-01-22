@@ -1,12 +1,10 @@
 
+using Test
+import XSBenchThreads
 
-
-function test_args_parsing()::Bool
+@testset "io" begin
     args::Array{String,1} = ["-g", "32000", "-m", "this_method"]
-    XSBenchThreads.read_CLI(args)
-
-    return true
+    inputs = XSBenchThreads.read_CLI(args)
+    println(inputs)
+    @test inputs.n_gridpoints == 32_000
 end
-
-
-@test test_args_parsing() == true
