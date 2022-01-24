@@ -3,11 +3,9 @@ module XSBenchThreads
 # struct
 export Inputs
 # functions
-export main, read_CLI
+export main, read_CLI, Inpus
 
 import MPI
-
-HISTORY_BASED = 1
 
 mutable struct Inputs
     nthreads::Int32
@@ -15,12 +13,26 @@ mutable struct Inputs
     n_gridpoints::Int64
     lookups::Int32
     HM::String
-    grid_type::Int32
+    grid_type::String
     hash_bins::Int32
     particles::Int32
-    simulation_method::Int32
-    binary_mode::Int32
+    simulation_method::String
+    binary_mode::String
     kernel_id::Int32
+
+    Inputs() = new(
+        Threads.nthreads(),
+        Int64(355),
+        Int64(11303),
+        Int32(34),
+        "large",
+        "unionized",
+        Int32(10_000),
+        Int32(500_000),
+        "history_based",
+        "none",
+        Int32(0),
+    )
 end
 
 include("io.jl")

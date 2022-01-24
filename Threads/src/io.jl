@@ -41,42 +41,7 @@ end
 
 
 
-function read_CLI(args::Array{String,1})
-
-    # input = Inputs()
-
-    # ## defaults to the history based simulation method
-    # input.simulation_method = HISTORY_BASED
-
-    # ## defaults to max threads on the system	
-    # input.nthreads = Threads.nthreads()
-
-    # ## defaults to 355 (corresponding to H-M Large benchmark)
-    # input.n_isotopes = 355
-
-    # ## defaults to 11303 (corresponding to H-M Large benchmark)
-    # input.n_gridpoints = 11303
-
-    # ## defaults to 500,000
-    # input.particles = 500000
-
-    # ## defaults to 34
-    # input.lookups = 34
-
-    # ## default to unionized grid
-    # input.grid_type = UNIONIZED
-
-    # ## default to unionized grid
-    # input.hash_bins = 10000
-
-    # ## default to no binary read/write
-    # input.binary_mode = NONE
-
-    # ## defaults to baseline kernel
-    # input.kernel_id = 0
-
-    # ## defaults to H-M Large benchmark
-    # input.HM = "large"
+function read_CLI(args::Array{String,1})::Inputs
 
     ## Check if user sets these
     user_g = 0
@@ -87,38 +52,97 @@ function read_CLI(args::Array{String,1})
 
     ArgParse.@add_arg_table! parse_settings begin
         "-g"
-        help = "n_gridpoints"
         arg_type = Int64
-        default = 11303
-        required = false
+        default = Int64(11303)
+        range_tester = x -> x > 0
+        help = "Number of Grid Points, must be larger than 0"
         "-m"
         help = "Simulation Method"
         arg_type = String
         default = "history"
-        required = false
-        # "-l"
-        # help = "lookups"
-        # "-h"
-        # help = "hash bins"
-        # "-p"
-        # help = "particles"
-        # "-s"
-        # help = "HM"
-        # "-G"
-        # help = "grid type"
-        # "-b"
-        # help = "binary mode"
-        # "-k"
-        # help = "kernel optimization selection"
+        "-l"
+        help = "Lookups"
+        arg_type = Int32
+        default = Int32(34)
+        range_tester = x -> x > 0
+        # using upper case H since h is reserved when add_help is true 
+        # https://argparsejl.readthedocs.io/en/latest/argparse.html#general-settings 
+        "-H"
+        help = "Hash Bins"
+        arg_type = Int32
+        default = Int32(10000)
+        "-p"
+        help = "Particles"
+        arg_type = Int32
+        default = Int32(500000)
+        "-s"
+        help = "HM"
+        arg_type = String
+        default = "large"
+        "-G"
+        help = "Grid Type"
+        arg_type = String
+        default = "unionized"
+        "-b"
+        help = "Binary Mode"
+        arg_type = String
+        default = "none"
+        "-k"
+        help = "Kernel Optimization Selection"
+        arg_type = Int32
+        default = Int32(0)
     end
 
     parsed_args = ArgParse.parse_args(args, parse_settings)
 
-    # println("Parse settings ", parsed_args)
+    default_lookups::Int32 = 1
+    default_particles::Int32 = 1
 
-    println("Print map:")
+    # Set up returning inputs struct
+    inputs = Inputs()
+
     for (key, value) in parsed_args
-        println(key, " => ", value)
+
+        if key == "g"
+            inputs.n_gridpoints = value
+
+        elseif key == "m"
+            inputs.simulation_method = value
+            if value == "event"
+                if default_lookups != 0 && default_particles != 0
+                    inputs.lookups = inputs.lookups * inputs.particles
+                    inputs.particles = 0
+                end
+
+            end
+
+        elseif key == "l"
+            inputs.lookups = value
+            default_lookups = 0
+
+        elseif key == "H"
+            inputs.hash_bins = value
+
+        elseif key == "p"
+            inputs.particles = value
+            default_particles = 0
+
+        elseif key == "s"
+            inputs.HM = value
+
+        elseif key == "G"
+            inputs.grid_type = value
+
+        elseif key == "b"
+            inputs.binary_mode = value
+
+        elseif key == "k"
+            inputs.kernel_id = value
+
+        end
+
     end
 
+    # Validate inputs, throw exceptions
+    return inputs
 end
