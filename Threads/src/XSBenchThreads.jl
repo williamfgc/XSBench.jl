@@ -7,8 +7,6 @@ export main, read_CLI, Inpus
 
 import MPI
 
-HISTORY_BASED = 1
-
 mutable struct Inputs
     nthreads::Int32
     n_isotopes::Int64

@@ -52,9 +52,10 @@ function read_CLI(args::Array{String,1})::Inputs
 
     ArgParse.@add_arg_table! parse_settings begin
         "-g"
-        help = "Number of Grid Points"
         arg_type = Int64
         default = Int64(11303)
+        range_tester = x -> x > 0
+        help = "Number of Grid Points, must be larger than 0"
         "-m"
         help = "Simulation Method"
         arg_type = String
@@ -63,6 +64,7 @@ function read_CLI(args::Array{String,1})::Inputs
         help = "Lookups"
         arg_type = Int32
         default = Int32(34)
+        range_tester = x -> x > 0
         # using upper case H since h is reserved when add_help is true 
         # https://argparsejl.readthedocs.io/en/latest/argparse.html#general-settings 
         "-H"
@@ -93,37 +95,54 @@ function read_CLI(args::Array{String,1})::Inputs
 
     parsed_args = ArgParse.parse_args(args, parse_settings)
 
-    # println("Parse settings ", parsed_args)
+    default_lookups::Int32 = 1
+    default_particles::Int32 = 1
 
-    # println("Print map:")
+    # Set up returning inputs struct
     inputs = Inputs()
 
     for (key, value) in parsed_args
-        #println(key, " => ", value)
 
         if key == "g"
             inputs.n_gridpoints = value
 
         elseif key == "m"
+            inputs.simulation_method = value
+            if value == "event"
+                if default_lookups != 0 && default_particles != 0
+                    inputs.lookups = inputs.lookups * inputs.particles
+                    inputs.particles = 0
+                end
+
+            end
 
         elseif key == "l"
+            inputs.lookups = value
+            default_lookups = 0
 
         elseif key == "H"
+            inputs.hash_bins = value
 
         elseif key == "p"
+            inputs.particles = value
+            default_particles = 0
 
         elseif key == "s"
+            inputs.HM = value
 
         elseif key == "G"
+            inputs.grid_type = value
 
         elseif key == "b"
+            inputs.binary_mode = value
 
         elseif key == "k"
+            inputs.kernel_id = value
 
         end
 
     end
 
+    # Validate inputs, throw exceptions
     return inputs
-
 end
