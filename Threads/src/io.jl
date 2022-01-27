@@ -48,7 +48,10 @@ function read_CLI(args::Array{String,1})::Inputs
     default_lookups = 1
     default_particles = 1
 
-    parse_settings = ArgParse.ArgParseSettings("XSBench.jl argument settings.")
+    parse_settings = ArgParse.ArgParseSettings(
+        "XSBench.jl argument settings.",
+        exc_handler = ArgParse.debug_handler,
+    )
 
     ArgParse.@add_arg_table! parse_settings begin
         "-g"
