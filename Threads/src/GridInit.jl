@@ -1,4 +1,12 @@
+function LCG_random_double(seed::UInt64)
 
+    m::UInt64 = 9_223_372_036_854_775_808 # 2^63
+    a::UInt64 = 2_806_196_910_506_780_709
+    c::UInt64 = 1
+    new_seed::UInt64 = (a * seed + c) % m
+    new_seed_d::Float64 = Float64(new_seed) / Float64(m)
+    return new_seed, new_seed_d
+end
 
 function grid_init_do_not_profile(inputs::Inputs, mype::Int32)::SimulationData
 
@@ -30,13 +38,20 @@ function grid_init_do_not_profile(inputs::Inputs, mype::Int32)::SimulationData
     ## energy level are read whenever the gridpoint is accessed, meaning the
     ## AOS is more cache efficient.
 
-    ## Initialize Nuclide Grid
+    ## Allocate Nuclide Grid
     simulation_data.length_nuclide_grid = inputs.n_isotopes * inputs.n_gridpoints
-
     resize!(simulation_data.nuclide_grid, simulation_data.length_nuclide_grid)
 
     nbytes += size(simulation_data.nuclide_grid)[1] * sizeof(NuclideGridPoint)
     println("nbytes: ", nbytes)
+
+    for i = 1:simulation_data.length_nuclide_grid
+        #println("i: ", i)
+        #simulation_data.nuclide_grid[i].energy = 0
+    end
+
+
+
 
     return simulation_data
 

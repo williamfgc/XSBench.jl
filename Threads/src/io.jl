@@ -40,7 +40,6 @@ function center_print_(s::String, width::Int32)
 end
 
 
-
 function read_CLI(args::Array{String,1})::Inputs
 
     ## Check if user sets these
@@ -146,6 +145,6 @@ function read_CLI(args::Array{String,1})::Inputs
 
     end
 
-    # Validate inputs, throw exceptions
+    # Validate inputs, throw exceptions or use range_tester 
     return inputs
 end
