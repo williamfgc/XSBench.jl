@@ -1,4 +1,4 @@
-function LCG_random_double(seed::UInt64)
+function LCG_random_double(seed::UInt64)::Tuple{UInt64,Float64}
 
     m::UInt64 = 9_223_372_036_854_775_808 # 2^63
     a::UInt64 = 2_806_196_910_506_780_709
@@ -10,14 +10,11 @@ end
 
 function grid_init_do_not_profile(inputs::Inputs, mype::Int32)::SimulationData
 
-    ## Structure to hold all allocated simuluation data arrays
+    ## Structure to hold all allocated simulution data arrays
     simulation_data = SimulationData()
 
     ## Keep track of how much data we're allocating
     nbytes::UInt64 = 0
-
-    ## Set the initial seed value
-    seed::UInt64 = 42
 
     ##############################
     ## Initialize Nuclide Grids
@@ -43,15 +40,26 @@ function grid_init_do_not_profile(inputs::Inputs, mype::Int32)::SimulationData
     resize!(simulation_data.nuclide_grid, simulation_data.length_nuclide_grid)
 
     nbytes += size(simulation_data.nuclide_grid)[1] * sizeof(NuclideGridPoint)
-    println("nbytes: ", nbytes)
+    # println("nbytes: ", nbytes)
+
+    ## Set the initial seed value
+    seed::UInt64 = 42
 
     for i = 1:simulation_data.length_nuclide_grid
-        #println("i: ", i)
-        #simulation_data.nuclide_grid[i].energy = 0
+
+        # create local struct
+        # nice because type alignment is known and no need to repeat
+        grid_point = NuclideGridPoint()
+
+        seed, grid_point.energy = LCG_random_double(seed)
+        seed, grid_point.total_xs = LCG_random_double(seed)
+        seed, grid_point.elastic_xs = LCG_random_double(seed)
+        seed, grid_point.absorption_xs = LCG_random_double(seed)
+        seed, grid_point.fission_xs = LCG_random_double(seed)
+        seed, grid_point.nu_fission_xs = LCG_random_double(seed)
+
+        simulation_data.nuclide_grid[i] = grid_point
     end
-
-
-
 
     return simulation_data
 

@@ -39,7 +39,7 @@ mutable struct NuclideGridPoint
     elastic_xs::Float64
     absorption_xs::Float64
     fission_xs::Float64
-    nu_fission::Float64
+    nu_fission_xs::Float64
 
     NuclideGridPoint() = new(0.0, 0.0, 0.0, 0.0, 0.0, 0.0)
 end
