@@ -37,28 +37,31 @@ function grid_init_do_not_profile(inputs::Inputs, mype::Int32)::SimulationData
 
     ## Allocate Nuclide Grid
     simulation_data.length_nuclide_grid = inputs.n_isotopes * inputs.n_gridpoints
-    resize!(simulation_data.nuclide_grid, simulation_data.length_nuclide_grid)
+    simulation_data.nuclide_grid =
+        Array{NuclideGridPoint}(undef, inputs.n_gridpoints, inputs.n_isotopes)
 
-    nbytes += size(simulation_data.nuclide_grid)[1] * sizeof(NuclideGridPoint)
-    # println("nbytes: ", nbytes)
+    nbytes += simulation_data.length_nuclide_grid * sizeof(NuclideGridPoint)
+    println("nbytes: ", nbytes)
 
     ## Set the initial seed value
     seed::UInt64 = 42
 
-    for i = 1:simulation_data.length_nuclide_grid
+    for i = 1:inputs.n_isotopes
+        for j = 1:inputs.n_gridpoints
 
-        # create local struct
-        # nice because type alignment is known and no need to repeat
-        grid_point = NuclideGridPoint()
+            # create local struct
+            # nice because type alignment is known and no need to repeat
+            grid_point = NuclideGridPoint()
 
-        seed, grid_point.energy = LCG_random_double(seed)
-        seed, grid_point.total_xs = LCG_random_double(seed)
-        seed, grid_point.elastic_xs = LCG_random_double(seed)
-        seed, grid_point.absorption_xs = LCG_random_double(seed)
-        seed, grid_point.fission_xs = LCG_random_double(seed)
-        seed, grid_point.nu_fission_xs = LCG_random_double(seed)
+            seed, grid_point.energy = LCG_random_double(seed)
+            seed, grid_point.total_xs = LCG_random_double(seed)
+            seed, grid_point.elastic_xs = LCG_random_double(seed)
+            seed, grid_point.absorption_xs = LCG_random_double(seed)
+            seed, grid_point.fission_xs = LCG_random_double(seed)
+            seed, grid_point.nu_fission_xs = LCG_random_double(seed)
 
-        simulation_data.nuclide_grid[i] = grid_point
+            simulation_data.nuclide_grid[j, i] = grid_point
+        end
     end
 
     return simulation_data

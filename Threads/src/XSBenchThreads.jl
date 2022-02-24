@@ -48,9 +48,9 @@ end
 mutable struct SimulationData
     num_nucs::Array{Int32,1}
     length_nuclide_grid::Int32
-    nuclide_grid::Array{NuclideGridPoint,1}
+    nuclide_grid::Array{NuclideGridPoint,2}
 
-    SimulationData() = new(Array{Int32,1}[], Int32(0), Array{NuclideGridPoint,1}[])
+    SimulationData() = new(Array{Int32,1}[], Int32(0), Array{NuclideGridPoint}(undef, 0, 0))
 end
 
 
