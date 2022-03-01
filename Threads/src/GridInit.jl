@@ -1,3 +1,4 @@
+
 function LCG_random_double(seed::UInt64)::Tuple{UInt64,Float64}
 
     m::UInt64 = 9_223_372_036_854_775_808 # 2^63
@@ -7,6 +8,7 @@ function LCG_random_double(seed::UInt64)::Tuple{UInt64,Float64}
     new_seed_d::Float64 = Float64(new_seed) / Float64(m)
     return new_seed, new_seed_d
 end
+
 
 function grid_init_do_not_profile(inputs::Inputs, mype::Int32)::SimulationData
 
@@ -61,8 +63,57 @@ function grid_init_do_not_profile(inputs::Inputs, mype::Int32)::SimulationData
             seed, grid_point.nu_fission_xs = LCG_random_double(seed)
 
             simulation_data.nuclide_grid[j, i] = grid_point
+
+            # println("j: ", j, " i: ", i, " ", grid_point.energy)
         end
     end
+
+    # Sort so that each nuclide has data stored in ascending energy order.
+    sort!(simulation_data.nuclide_grid, dims = 1, by = v -> v.energy)
+
+    # println("Sorted by energy: ")
+    # for i = 1:inputs.n_isotopes
+    #     for j = 1:inputs.n_gridpoints
+    #         println("j: ", j, " i: ", i, " ", simulation_data.nuclide_grid[j, i])
+    #     end
+    #     println("")
+    # end
+
+    ####################################
+    ## Initialize Acceleration Structure
+    ####################################  
+
+    if inputs.grid_type == "nuclide"
+        simulation_data.length_unionized_energy_array = 0
+        simulation_data.length_index_grid = 0
+    end
+
+    if inputs.grid_type == "unionized"
+        if mype == 0
+            println("Intializing unionized grid...")
+        end
+
+        simulation_data.length_unionized_energy_array =
+            inputs.n_gridpoints * inputs.n_isotopes
+        simulation_data.unionized_energy_array =
+            Array{Float64}(undef, inputs.n_gridpoints, inputs.n_isotopes)
+
+        nbytes += simulation_data.length_unionized_energy_array * sizeof(Float64)
+
+        # Copy energy data over from the nuclide energy grid
+        for i = 1:inputs.n_isotopes
+            for j = 1:inputs.n_gridpoints
+                simulation_data.unionized_energy_array[j, i] =
+                    simulation_data.nuclide_grid[j, i].energy
+            end
+        end
+
+
+
+    end
+
+
+
 
     return simulation_data
 
