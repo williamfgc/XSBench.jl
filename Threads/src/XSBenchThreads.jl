@@ -52,6 +52,7 @@ mutable struct SimulationData
     length_unionized_energy_array::Int32
     length_index_grid::Int64
     unionized_energy_array::Array{Float64,2}
+    index_grid::Array{Int32,3}
 
     SimulationData() = new(
         Array{Int32,1}[],

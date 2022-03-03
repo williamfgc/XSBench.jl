@@ -38,12 +38,14 @@ function grid_init_do_not_profile(inputs::Inputs, mype::Int32)::SimulationData
     ## AOS is more cache efficient.
 
     ## Allocate Nuclide Grid
+    #inputs.n_isotopes = 2 #temp
+    #inputs.n_gridpoints = 4 #temp
+
     simulation_data.length_nuclide_grid = inputs.n_isotopes * inputs.n_gridpoints
     simulation_data.nuclide_grid =
         Array{NuclideGridPoint}(undef, inputs.n_gridpoints, inputs.n_isotopes)
 
     nbytes += simulation_data.length_nuclide_grid * sizeof(NuclideGridPoint)
-    println("nbytes: ", nbytes)
 
     ## Set the initial seed value
     seed::UInt64 = 42
@@ -90,7 +92,7 @@ function grid_init_do_not_profile(inputs::Inputs, mype::Int32)::SimulationData
 
     if inputs.grid_type == "unionized"
         if mype == 0
-            println("Intializing unionized grid...")
+            println("Initializing unionized grid...")
         end
 
         simulation_data.length_unionized_energy_array =
@@ -108,11 +110,51 @@ function grid_init_do_not_profile(inputs::Inputs, mype::Int32)::SimulationData
             end
         end
 
+        # Sort unionized energy array
+        sort!(reshape(simulation_data.unionized_energy_array, :))
 
+        # Allocate space to hold the acceleration grid indices
+        simulation_data.index_grid =
+            Array{Int32}(undef, inputs.n_isotopes, inputs.n_gridpoints, inputs.n_isotopes)
+
+        simulation_data.length_index_grid =
+            simulation_data.length_unionized_energy_array * inputs.n_isotopes
+        nbytes += simulation_data.length_index_grid * sizeof(Int32)
+
+        # Generates the double indexing grid
+        idx_low = zeros(Int32, inputs.n_isotopes) # zero initialized array
+        energy_high = Array{Float64,1}(undef, inputs.n_isotopes)
+
+        # initialize energy_high
+        for i = 1:inputs.n_isotopes
+            energy_high[i] = simulation_data.nuclide_grid[2, i].energy
+        end
+
+        for i = 1:inputs.n_isotopes
+            for j = 1:inputs.n_gridpoints
+                unionized_energy::Float64 = simulation_data.unionized_energy_array[j, i]
+
+                for k = 1:inputs.n_isotopes
+
+                    if unionized_energy < energy_high[k]
+                        simulation_data.index_grid[k, j, i] = idx_low[k]
+                    elseif idx_low[k] == inputs.n_gridpoints - 2
+                        simulation_data.index_grid[k, j, i] = idx_low[k]
+                    else
+                        idx_low[i] += 1
+                        simulation_data.index_grid[k, j, i] = idx_low[k]
+                        energy_high[k] =
+                            simulation_data.nuclide_grid[idx_low[i]+2, k].energy
+                    end
+                end
+            end
+        end
+
+        # here idx_low and energy_high should be collected
 
     end
 
-
+    println("nbytes: ", nbytes)
 
 
     return simulation_data
