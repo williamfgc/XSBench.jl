@@ -122,29 +122,32 @@ function grid_init_do_not_profile(inputs::Inputs, mype::Int32)::SimulationData
         nbytes += simulation_data.length_index_grid * sizeof(Int32)
 
         # Generates the double indexing grid
-        idx_low = zeros(Int32, inputs.n_isotopes) # zero initialized array
-        energy_high = Array{Float64,1}(undef, inputs.n_isotopes)
+        # one initialized array (1 is the minimum index in Julia)
+        # should this information be a Tuple?
+        idx_low::Array{Int32,1} = ones(Int32, inputs.n_isotopes)
+        energy_high::Array{Float64,1} = Array{Float64,1}(undef, inputs.n_isotopes)
 
-        # initialize energy_high
+        # initialize energy_high with the 2nd element for each isotope
         for i = 1:inputs.n_isotopes
             energy_high[i] = simulation_data.nuclide_grid[2, i].energy
         end
 
         for i = 1:inputs.n_isotopes
             for j = 1:inputs.n_gridpoints
+                # get local unionized_energy from aboslute sorted array
                 unionized_energy::Float64 = simulation_data.unionized_energy_array[j, i]
 
                 for k = 1:inputs.n_isotopes
 
                     if unionized_energy < energy_high[k]
                         simulation_data.index_grid[k, j, i] = idx_low[k]
-                    elseif idx_low[k] == inputs.n_gridpoints - 2
+                    elseif idx_low[k] == inputs.n_gridpoints - 1
                         simulation_data.index_grid[k, j, i] = idx_low[k]
                     else
-                        idx_low[i] += 1
+                        idx_low[k] += 1
                         simulation_data.index_grid[k, j, i] = idx_low[k]
                         energy_high[k] =
-                            simulation_data.nuclide_grid[idx_low[i]+2, k].energy
+                            simulation_data.nuclide_grid[idx_low[k]+1, k].energy
                     end
                 end
             end
