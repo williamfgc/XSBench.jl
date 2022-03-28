@@ -53,14 +53,19 @@ mutable struct SimulationData
     length_index_grid::Int64
     unionized_energy_array::Array{Float64,2}
     index_grid::Array{Int32,3}
+    max_num_nucs::Int32
+    mats::Array{Int32,2}
 
     SimulationData() = new(
-        Array{Int32,1}[],
+        Array{Int32,1}(undef,0),
         Int32(0),
         Array{NuclideGridPoint}(undef, 0, 0),
         Int32(0),
         Int64(0),
         Array{Float64}(undef, 0, 0),
+        Array{Int32}(undef, 0, 0, 0),
+        Int32(0),
+        Array{Int32}(undef, 0, 0),
     )
 end
 

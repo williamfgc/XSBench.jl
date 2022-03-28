@@ -1,3 +1,5 @@
+include("Materials.jl")
+
 
 function LCG_random_double(seed::UInt64)::Tuple{UInt64,Float64}
 
@@ -27,7 +29,7 @@ function grid_init_do_not_profile(inputs::Inputs, mype::Int32)::SimulationData
     end
 
     ## First, we need to initialize our nuclide grid. This comes in the form
-    ## of a flattened 2D array that hold all the information we need to define
+    ## of a 2D array that hold all the information we need to define
     ## the cross sections for all isotopes in the simulation. 
     ## The grid is composed of "NuclideGridPoint" structures, which hold the
     ## energy level of the grid point and all associated XS data at that level.
@@ -158,6 +160,35 @@ function grid_init_do_not_profile(inputs::Inputs, mype::Int32)::SimulationData
     end
 
     println("nbytes: ", nbytes)
+
+    ## TODO: pending HASH grid_type
+
+    ################################################
+    ## Initialize Materials and Concentrations
+    ################################################
+
+    if mype == 0
+        println("Intializing material data...\n")
+    end
+
+    # Set the number of nuclides for each material
+    simulation_data.num_nucs = load_num_nucs(inputs.n_isotopes)
+    #     Initialize the 2D grid of material data. The grid holds
+    #    a list of nuclide indices for each of the 12 material types. The
+    #    grid is allocated as a full square grid, even though not all
+    #    materials have the same number of nuclides.
+    simulation_data.max_num_nucs, simulation_data.mats =
+        load_mats(simulation_data.num_nucs, inputs.n_isotopes)
+    #.length_mats = SD.length_num_nucs * SD.max_num_nucs;
+
+    #    Initialize the 2D grid of nuclide concentration data. The grid
+    #    holds a list of nuclide concentrations for each of the 12 material types.
+    #    The grid is allocated as a full square grid, even though not all materials
+    #    have the same number of nuclides.
+    #SD.concs = load_concs(SD.num_nucs, SD.max_num_nucs);
+    #SD.length_concs = SD.length_mats;
+
+
 
 
     return simulation_data
