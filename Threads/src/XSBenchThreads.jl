@@ -55,6 +55,7 @@ mutable struct SimulationData
     index_grid::Array{Int32,3}
     max_num_nucs::Int32
     mats::Array{Int32,2}
+    concs::Array{Float64,2}
 
     SimulationData() = new(
         Array{Int32,1}(undef,0),
@@ -66,6 +67,7 @@ mutable struct SimulationData
         Array{Int32}(undef, 0, 0, 0),
         Int32(0),
         Array{Int32}(undef, 0, 0),
+        Array{Float64}(undef, 0, 0),
     )
 end
 

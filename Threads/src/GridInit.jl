@@ -1,16 +1,7 @@
+
+import Printf
+
 include("Materials.jl")
-
-
-function LCG_random_double(seed::UInt64)::Tuple{UInt64,Float64}
-
-    m::UInt64 = 9_223_372_036_854_775_808 # 2^63
-    a::UInt64 = 2_806_196_910_506_780_709
-    c::UInt64 = 1
-    new_seed::UInt64 = (a * seed + c) % m
-    new_seed_d::Float64 = Float64(new_seed) / Float64(m)
-    return new_seed, new_seed_d
-end
-
 
 function grid_init_do_not_profile(inputs::Inputs, mype::Int32)::SimulationData
 
@@ -43,7 +34,8 @@ function grid_init_do_not_profile(inputs::Inputs, mype::Int32)::SimulationData
     #inputs.n_isotopes = 2 #temp
     #inputs.n_gridpoints = 4 #temp
 
-    simulation_data.length_nuclide_grid = inputs.n_isotopes * inputs.n_gridpoints
+    simulation_data.length_nuclide_grid =
+        inputs.n_isotopes * inputs.n_gridpoints
     simulation_data.nuclide_grid =
         Array{NuclideGridPoint}(undef, inputs.n_gridpoints, inputs.n_isotopes)
 
@@ -102,7 +94,8 @@ function grid_init_do_not_profile(inputs::Inputs, mype::Int32)::SimulationData
         simulation_data.unionized_energy_array =
             Array{Float64}(undef, inputs.n_gridpoints, inputs.n_isotopes)
 
-        nbytes += simulation_data.length_unionized_energy_array * sizeof(Float64)
+        nbytes +=
+            simulation_data.length_unionized_energy_array * sizeof(Float64)
 
         # Copy energy data over from the nuclide energy grid
         for i = 1:inputs.n_isotopes
@@ -116,8 +109,12 @@ function grid_init_do_not_profile(inputs::Inputs, mype::Int32)::SimulationData
         sort!(reshape(simulation_data.unionized_energy_array, :))
 
         # Allocate space to hold the acceleration grid indices
-        simulation_data.index_grid =
-            Array{Int32}(undef, inputs.n_isotopes, inputs.n_gridpoints, inputs.n_isotopes)
+        simulation_data.index_grid = Array{Int32}(
+            undef,
+            inputs.n_isotopes,
+            inputs.n_gridpoints,
+            inputs.n_isotopes,
+        )
 
         simulation_data.length_index_grid =
             simulation_data.length_unionized_energy_array * inputs.n_isotopes
@@ -127,7 +124,8 @@ function grid_init_do_not_profile(inputs::Inputs, mype::Int32)::SimulationData
         # one initialized array (1 is the minimum index in Julia)
         # should this information be a Tuple?
         idx_low::Array{Int32,1} = ones(Int32, inputs.n_isotopes)
-        energy_high::Array{Float64,1} = Array{Float64,1}(undef, inputs.n_isotopes)
+        energy_high::Array{Float64,1} =
+            Array{Float64,1}(undef, inputs.n_isotopes)
 
         # initialize energy_high with the 2nd element for each isotope
         for i = 1:inputs.n_isotopes
@@ -137,7 +135,8 @@ function grid_init_do_not_profile(inputs::Inputs, mype::Int32)::SimulationData
         for i = 1:inputs.n_isotopes
             for j = 1:inputs.n_gridpoints
                 # get local unionized_energy from aboslute sorted array
-                unionized_energy::Float64 = simulation_data.unionized_energy_array[j, i]
+                unionized_energy::Float64 =
+                    simulation_data.unionized_energy_array[j, i]
 
                 for k = 1:inputs.n_isotopes
 
@@ -185,11 +184,15 @@ function grid_init_do_not_profile(inputs::Inputs, mype::Int32)::SimulationData
     #    holds a list of nuclide concentrations for each of the 12 material types.
     #    The grid is allocated as a full square grid, even though not all materials
     #    have the same number of nuclides.
-    #SD.concs = load_concs(SD.num_nucs, SD.max_num_nucs);
-    #SD.length_concs = SD.length_mats;
+    simulation_data.concs =
+        load_concs(simulation_data.num_nucs, simulation_data.max_num_nucs)
 
-
-
+    if mype == 0
+        Printf.@printf(
+            "Initialization complete. Allocated %.3f MB of data\n",
+            nbytes / 1024.0 / 1024.0,
+        )
+    end
 
     return simulation_data
 
